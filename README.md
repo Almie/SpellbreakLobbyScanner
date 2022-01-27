@@ -2,7 +2,9 @@
 Get information about your Spellbreak lobby - the region, port number, the amount of players, their names and hidden ranks! The Twitch bot prints them into your Twitch chat. Now includes an OBS overlay to display the information directly on your stream. It reads all the information from your g3 logs.
 
 The original idea for this is by th_mrow. You can find them here:
+
 https://www.twitch.tv/th_mrow
+
 https://github.com/thbl088/mrow_twitch_scripts
 
 ## How to setup
