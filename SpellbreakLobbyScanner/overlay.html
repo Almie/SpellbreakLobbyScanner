@@ -1,0 +1,133 @@
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+  <script src="API_Key.js"></script>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+
+<body>
+  <div id="app">
+    <div class="eventpopup" v-bind:class="{appear:event_active,success:event_success,error:event_error,marquee:marquee_enabled}">
+      <p class="eventtext" v-bind:class="{marquee:marquee_enabled}" v-html="my_event" ref="eventtext"></p>
+    </div>
+  </div>
+</body>
+
+
+<script>
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      my_event: "Connection to chatbot not established.",
+      event_active: true,
+      event_success: false,
+      event_error: true,
+      marquee_enabled: true,
+      serviceUrl: "",
+      socket: Object
+    },
+    mounted: function () {
+      //---------------------------------
+      //  Variables
+      //---------------------------------
+      this.serviceUrl = API_Socket;
+      this.socket = new WebSocket(this.serviceUrl);
+
+      //---------------------------------
+      //  Open Event
+      //---------------------------------
+      this.socket.onopen = function () {
+        // Format your Authentication Information
+        var auth = {
+          author: 'almie',
+          website: 'https://Streamlabs.com',
+          api_key: API_Key,
+          events: ['EVENT_SB_QUEUEPOPPED']
+        };
+
+        //  Send your Data to the server
+        vm.socket.send(JSON.stringify(auth));
+      };
+
+      //---------------------------------
+      //  Error Event
+      //---------------------------------
+      this.socket.onerror = function (error) {
+        //  Something went terribly wrong... Respond?!
+        console.log('Error: ' + error);
+      };
+
+      //---------------------------------
+      //  Message Event
+      //---------------------------------
+      this.socket.onmessage = function (message) {
+        var json = JSON.parse(message.data);
+        switch(json.event)
+        {
+          case 'EVENT_SB_QUEUEPOPPED':
+            var obj = JSON.parse(json.data);
+            vm.my_event = `Queue Popped! Port: ${obj.port}`;
+            vm.event_error = false;
+            vm.event_success = false;
+            vm.event_active = true;
+            setTimeout(function(scope) {
+              scope.event_active = false;
+              },7000, vm);
+            break;
+          case 'EVENT_SB_MATCHSTARTED':
+            var obj = JSON.parse(json.data);
+            vm.my_event = `New match! Port: ${obj.port}`;
+            vm.event_error = false;
+            vm.event_success = false;
+            vm.event_active = true;
+            setTimeout(function(scope) {
+              scope.event_active = false;
+            },15000, vm);
+            break;
+          case 'EVENT_CONNECTED':
+            vm.my_event = 'Successfully connected & authenticated!';
+            vm.event_error = false;
+            vm.event_success = true;
+            setTimeout(function(scope) {
+              scope.event_active = false;
+              },2000, vm);
+            break;
+        }
+        //  You have received new data now process it
+        console.log(message);
+      };
+
+      //---------------------------------
+      //  Message Event
+      //---------------------------------
+      this.socket.onclose = function () {
+        //  Connection has been closed by you or the server
+        console.log("Connection Closed!");
+      };
+    },
+    updated: function (){
+      console.log("Updated!");
+    },
+    methods: {
+      checkOverflow: function(val, oldVal){
+        setTimeout(function(scope) {
+          eventText = scope.$refs.eventtext;
+          eventTextWidth = eventText.getBoundingClientRect().width;
+          console.log('checking overflow! %s %s %s, new: %s, old: %s', eventText.clientWidth, eventTextWidth, window.innerWidth, val, oldVal);
+
+          if (eventTextWidth > window.innerWidth){
+            vm.marquee_enabled = true;
+          }
+          else {
+            vm.marquee_enabled = false;
+          }
+        },100, vm);
+      }
+    },
+    watch: {
+      my_event: 'checkOverflow'
+    }
+  });
+</script>
+
+</html>

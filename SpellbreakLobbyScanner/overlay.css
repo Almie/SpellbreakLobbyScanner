@@ -1,0 +1,95 @@
+body{
+  background-color: rgba(0,0,0,0);
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.eventpopup {
+  display: inline-block;
+  position: relative;
+  margin: 0;
+  padding: 0 25vh 0 25vh;
+  width: 100%;
+  height: 100%;
+  line-height: 100%;
+  background-color: #56027c;
+  color: #56027c;
+  font-family: sans-serif;
+  font-weight: 900;
+  vertical-align: middle;
+  transform: translate(0px, -100%);
+  transition: transform 1.2s;
+  transition-timing-function: cubic-bezier(0.89, 0.01, 0.13, 0.99);
+  overflow-x: hidden;
+}
+.eventpopup.marquee{
+  padding:0;
+}
+.eventpopup.appear{
+  transform: translate(0px, 0px);
+}
+.eventpopup.error{
+  background-color: #9b0000;
+  color: #9b0000;
+}
+.eventpopup.error.marquee:before {
+  color:currentColor;
+  background: linear-gradient(to right, currentColor 0%, transparent 100%);
+}
+.eventpopup.error.marquee:after {
+  color:currentColor;
+  background: linear-gradient(to left, currentColor 0%, transparent 100%);
+}
+.eventpopup.success{
+  background-color: #168114;
+  color: #168114;
+}
+.eventpopup.success.marquee:before {
+  color:currentColor;
+  background: linear-gradient(to right, currentColor 0%, transparent 100%);
+}
+.eventpopup.success.marquee:after {
+  color:currentColor;
+  background: linear-gradient(to left, currentColor 0%, transparent 100%);
+}
+.eventpopup.marquee:before, .eventpopup.marquee:after {
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100vh;
+  content: "";
+  z-index: 1;
+}
+.eventpopup.marquee:before {
+  left: 0;
+  color:currentColor;
+  background: linear-gradient(to right, currentColor 0%, transparent 100%);
+}
+.eventpopup.marquee:after {
+  right: 0;
+  color:currentColor;
+  background: linear-gradient(to left, currentColor 0%, transparent 100%);
+}
+.eventtext{
+  display: inline-block;
+  vertical-align: middle;
+  position: absolute;
+  top: 0%;
+  color:#ffffff;
+  font-weight: 900;
+  font-size: 50vh;
+  transform: translateY(-50%);
+  width: max-content;
+}
+.eventtext.marquee{
+  animation: marquee 10s linear infinite;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translate(100vw, -50%);
+    }
+    100% {
+        transform: translate(-100%, -50%);
+    }
+}
