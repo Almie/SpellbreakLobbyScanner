@@ -7,6 +7,16 @@ https://www.twitch.tv/th_mrow
 
 https://github.com/thbl088/mrow_twitch_scripts
 
+## Twitch chat commands
+- `!sb players` - Shows a list of all the players and their rank (represented by an emoji)
+- `!sb ranks` - Explains which emoji is which rank
+- `!sb server` - Shows the current region and port number
+- `!sb info <player_name>` - Shows information about the specified player, if they are in the current lobby. Prints the platform they are currently playing on and their hidden BR ranks for solos, duos and squads.
+
+Tests:
+- `!sb test queue_pop` - Shows the "Queue popped!" notification with info from the last match for testing purposes.
+- `!sb test match_start` - Shows the "New match!" notification with info from the last match for testing purposes.
+
 ## How to setup
 
 ### Prerequisites
