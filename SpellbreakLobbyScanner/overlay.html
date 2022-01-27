@@ -42,7 +42,7 @@
           author: 'almie',
           website: 'https://Streamlabs.com',
           api_key: API_Key,
-          events: ['EVENT_SB_QUEUEPOPPED']
+          events: ['EVENT_SB_QUEUEPOPPED', 'EVENT_SB_MATCHSTARTED']
         };
 
         //  Send your Data to the server
@@ -76,13 +76,24 @@
             break;
           case 'EVENT_SB_MATCHSTARTED':
             var obj = JSON.parse(json.data);
-            vm.my_event = `New match! Port: ${obj.port}`;
+            vm.my_event = `New ${obj.mode} match with ${obj.numplayers} players on ${obj.region} (port ${obj.port})! The highest ranked ${obj.playertext} with ${obj.maxrank}: ${obj.maxrankname}`;
             vm.event_error = false;
             vm.event_success = false;
             vm.event_active = true;
-            setTimeout(function(scope) {
+            setTimeout(function(scope, obj) {
               scope.event_active = false;
-            },15000, vm);
+              setTimeout(function(scope, obj) {
+                playersListText = [];
+                obj.players.forEach(function(player){
+                  playersListText.push(player.name + ' ('+player.rank+')');
+                });
+                scope.my_event = 'Players in this lobby: ' + playersListText.join(', ');
+                scope.event_active = true;
+                setTimeout(function(scope) {
+                  scope.event_active = false;
+                },22000, scope);
+              },2000, scope, obj);
+            },20000, vm, obj);
             break;
           case 'EVENT_CONNECTED':
             vm.my_event = 'Successfully connected & authenticated!';

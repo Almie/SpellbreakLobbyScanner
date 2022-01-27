@@ -9,8 +9,8 @@ clr.AddReference("IronPython.Modules.dll")
 
 #Script Infos
 ScriptName = "SpellbreakLobbyScanner"
-Website = "https://www.twitch.tv/almie__"
-Description = "Gives you the amount of players in your spellbreak game."
+Website = "https://github.com/Almie/SpellbreakLobbyScanner"
+Description = "Gives you information about your Spellbreak lobby. Original idea by th_mrow."
 Creator = "almie"
 Version = "1.0.1"
 
@@ -92,6 +92,10 @@ class Player(object):
             return self.rank_duo
         elif gamemode == 'squad':
             return self.rank_squad
+
+    def overlay_data(self, gamemode):
+        return {'name' : self.name,
+                'rank' : self.rank(gamemode).displayName()}
 
     def json_data(self):
         return {'name' : self.name,
@@ -207,6 +211,7 @@ class PlayerData(object):
                     self.queuePopped = True
                     Parent.Log(ScriptName, "Queue Popped! (Port {})".format(self.currentPort))
                     Parent.SendTwitchMessage("Queue Popped! (Port {})".format(self.currentPort))
+                    Parent.BroadcastWsEvent('EVENT_SB_QUEUEPOPPED', '{{"port" : "{}"}}'.format(self.currentPort))
                     break
                 if line.count(MATCH_START_STRING) > 0 and not self.queuePopped:
                     break
@@ -248,27 +253,36 @@ class PlayerData(object):
         highestRank = max([pl.rank(self.currentGameMode) for pl in self.players])
         playersWithHighestRank = [pl for pl in self.players if pl.rank(self.currentGameMode) == highestRank]
         playersHighestText = 'players' if len(playersWithHighestRank) > 1 else 'player'
-        Parent.SendTwitchMessage('New {mode} match with {pl} players on {region} (port {port})! The highest ranked {playertext} with {maxrank}: {maxrankname}'.format(
-                                    mode=self.currentGameMode,
-                                    pl=len(self.players),
-                                    region=self.currentRegion,
-                                    port=self.currentPort,
-                                    playertext=playersHighestText,
-                                    maxrank=highestRank.displayNameFull(),
-                                    maxrankname=', '.join([pl.name for pl in playersWithHighestRank])
-                                    ))
-        Parent.Log(ScriptName, 'New {mode} match with {pl} players on {region} (port {port})! The highest ranked {playertext} with {maxrank}: {maxrankname}'.format(
-                                    mode=self.currentGameMode,
-                                    pl=len(self.players),
-                                    region=self.currentRegion,
-                                    port=self.currentPort,
-                                    playertext=playersHighestText,
-                                    maxrank=highestRank.displayNameFull(),
-                                    maxrankname=', '.join([pl.name for pl in playersWithHighestRank])
-                                    ))
-
+        newMatchDict = {'mode': self.currentGameMode,
+                        'numplayers': len(self.players),
+                        'region': self.currentRegion,
+                        'port': self.currentPort,
+                        'playertext': playersHighestText,
+                        'maxrank': highestRank.displayNameFull(),
+                        'maxrankname': ', '.join([pl.name for pl in playersWithHighestRank]),
+                        'players': [pl.overlay_data(self.currentGameMode) for pl in self.players]
+                        }
+        Parent.SendTwitchMessage('New {mode} match with {numplayers} players on {region} (port {port})! The highest ranked {playertext} with {maxrank}: {maxrankname}'.format(**newMatchDict))
+        Parent.BroadcastWsEvent('EVENT_SB_MATCHSTARTED', json.dumps(newMatchDict))
+        Parent.Log(ScriptName, 'New {mode} match with {numplayers} players on {region} (port {port})! The highest ranked {playertext} with {maxrank}: {maxrankname}'.format(**newMatchDict))
         Parent.Log(ScriptName, str([(pl.name, pl.rank(self.currentGameMode)) for pl in self.players]))
 
+def testNewMatch():
+    global PLAYER_DATA
+    highestRank = max([pl.rank(PLAYER_DATA.currentGameMode) for pl in PLAYER_DATA.players])
+    playersWithHighestRank = [pl for pl in PLAYER_DATA.players if pl.rank(PLAYER_DATA.currentGameMode) == highestRank]
+    playersHighestText = 'players' if len(playersWithHighestRank) > 1 else 'player'
+    newMatchDict = {'mode': PLAYER_DATA.currentGameMode,
+                    'numplayers': len(PLAYER_DATA.players),
+                    'region': PLAYER_DATA.currentRegion,
+                    'port': PLAYER_DATA.currentPort,
+                    'playertext': playersHighestText,
+                    'maxrank': highestRank.displayNameFull(),
+                    'maxrankname': ', '.join([pl.name for pl in playersWithHighestRank]),
+                    'players': [pl.overlay_data(PLAYER_DATA.currentGameMode) for pl in PLAYER_DATA.players]
+                    }
+    Parent.SendTwitchMessage('New {mode} match with {numplayers} players on {region} (port {port})! The highest ranked {playertext} with {maxrank}: {maxrankname}'.format(**newMatchDict))
+    Parent.BroadcastWsEvent('EVENT_SB_MATCHSTARTED', json.dumps(newMatchDict))
 
 #on script load/reload
 def Init():
@@ -309,6 +323,12 @@ def Execute(data):
                     Parent.SendTwitchMessage("Cound find player with the name {} in the current match.".format(requestedUser))
             if data.GetParam(1) == 'server':
                 Parent.SendTwitchMessage('Current region: {} | Current port: {}'.format(PLAYER_DATA.currentRegion, PLAYER_DATA.currentPort))
+            if data.GetParam(1) == 'test':
+                if data.GetParam(2) == 'match_start':
+                    testNewMatch()
+                if data.GetParam(2) == 'queue_pop':
+                    Parent.BroadcastWsEvent('EVENT_SB_QUEUEPOPPED', '{{"port" : "{}"}}'.format(PLAYER_DATA.currentPort))
+
 
 #abc
 def Tick():
