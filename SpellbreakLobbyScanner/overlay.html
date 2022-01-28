@@ -22,7 +22,7 @@
       event_active: true,
       event_success: false,
       event_error: true,
-      marquee_enabled: true,
+      marquee_enabled: false,
       serviceUrl: "",
       socket: Object
     },
@@ -87,7 +87,7 @@
                 obj.players.forEach(function(player){
                   playersListText.push(player.name + ' ('+player.rank+')');
                 });
-                scope.my_event = 'Players in this lobby: ' + playersListText.join(', ');
+                scope.my_event = obj.numplayers.toString() + ' players in this lobby: ' + playersListText.join(', ');
                 scope.event_active = true;
                 setTimeout(function(scope) {
                   scope.event_active = false;

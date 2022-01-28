@@ -297,9 +297,9 @@ def Execute(data):
     if data.IsChatMessage():
         Parent.Log(ScriptName, 'Execute Command {} {}'.format(data.GetParam(0), data.GetParam(1)))
         if data.GetParam(0) == "!sb": #and Parent.HasPermission(data.User, "moderator", "Get Spellbreak Lobby Information"):
-            if data.GetParam(1) == "players":
+            if data.GetParam(1) == "players" and Parent.HasPermission(data.User, "moderator", "Get list of players"):
                 playersByRank = sorted(PLAYER_DATA.players, key=lambda pl: pl.rank(PLAYER_DATA.currentGameMode), reverse=True)
-                Parent.SendTwitchMessage(' | '.join(["{0} ({1})".format(player.name, player.rank(PLAYER_DATA.currentGameMode).displayName()) for player in playersByRank]))
+                Parent.SendTwitchMessage('{} players in this lobby: {}'.format(len(PLAYER_DATA.players), ' | '.join(["{0} ({1})".format(player.name, player.rank(PLAYER_DATA.currentGameMode).displayName()) for player in playersByRank])))
             if data.GetParam(1) == "ranks":
                 Parent.SendTwitchMessage(', '.join(["{} - {}".format(Rank.DISPLAY_EMOJI[tier], tier) for tier in Rank.SORT_ORDER]))
             if data.GetParam(1) == "info":
@@ -323,7 +323,7 @@ def Execute(data):
                     Parent.SendTwitchMessage("Cound find player with the name {} in the current match.".format(requestedUser))
             if data.GetParam(1) == 'server':
                 Parent.SendTwitchMessage('Current region: {} | Current port: {}'.format(PLAYER_DATA.currentRegion, PLAYER_DATA.currentPort))
-            if data.GetParam(1) == 'test':
+            if data.GetParam(1) == 'test' and Parent.HasPermission(data.User, "moderator", "Test notification"):
                 if data.GetParam(2) == 'match_start':
                     testNewMatch()
                 if data.GetParam(2) == 'queue_pop':
